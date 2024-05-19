@@ -11,13 +11,13 @@ namespace TheAdventure
     {
         private readonly Dictionary<int, GameObject> _gameObjects = new();
         private readonly Dictionary<string, TileSet> _loadedTileSets = new();
-
+        
         private Level? _currentLevel;
         private PlayerObject _player;
         private GameRenderer _renderer;
         private Input _input;
         private ScriptEngine _scriptEngine;
-
+        private int _score;
         private DateTimeOffset _lastUpdate = DateTimeOffset.Now;
         private DateTimeOffset _lastPlayerUpdate = DateTimeOffset.Now;
 
@@ -93,7 +93,6 @@ namespace TheAdventure
             bool right = _input.IsRightPressed();
             bool isAttacking = _input.IsKeyAPressed();
             bool addBomb = _input.IsKeyBPressed();
-            bool addCoin = _input.IsKeyBPressed();
 
             _scriptEngine.ExecuteAll(this);
 
@@ -129,10 +128,6 @@ namespace TheAdventure
             {
                 AddBomb(_player.Position.X, _player.Position.Y, false);
             }
-            if (addCoin)
-            {
-                AddCoin(_player.Position.X, _player.Position.Y, false);
-            }
 
             foreach (var gameObjectId in itemsToRemove)
             {
@@ -149,19 +144,27 @@ namespace TheAdventure
                     DestroyTile(tempObject.Position.X, tempObject.Position.Y);
                     _gameObjects.Remove(tempObject.Id);
                 }
-                else if (gameObject is TemporaryGameObject)
+            }
+
+            foreach (var gameObject in _gameObjects.Values)
+            {
+                if (gameObject is TemporaryGameObject)
                 {
                     var tempObject = (TemporaryGameObject)gameObject;
                     var deltaX = Math.Abs(_player.Position.X - tempObject.Position.X);
                     var deltaY = Math.Abs(_player.Position.Y - tempObject.Position.Y);
                     if (deltaX < 32 && deltaY < 32)
                     {
-                        var spriteSheet = SpriteSheet.LoadSpriteSheet("coin.json", "Assets", _renderer);
-                        spriteSheet.ActivateAnimation("Pickup");
+                        PickUpCoin(1);
+                        _gameObjects.Remove(tempObject.Id);
                     }
-                    _gameObjects.Remove(tempObject.Id);
                 }
             }
+        }
+
+        private void PickUpCoin(int modifier=1)
+        {
+            _score += modifier;
         }
 
         public void RenderFrame()
@@ -173,7 +176,7 @@ namespace TheAdventure
 
             RenderTerrain();
             RenderAllObjects();
-
+            
             _renderer.PresentFrame();
         }
 
@@ -271,7 +274,8 @@ namespace TheAdventure
             var spriteSheet = SpriteSheet.LoadSpriteSheet("coin.json", "Assets", _renderer);
             if (spriteSheet != null)
             {
-                TemporaryGameObject coin = new(spriteSheet, 2.1, (translated.X, translated.Y));
+                spriteSheet.ActivateAnimation("Pickup");
+                TemporaryGameObject coin = new(spriteSheet, 100, (translated.X, translated.Y));
                 _gameObjects.Add(coin.Id, coin);
             }
         }
