@@ -75,15 +75,15 @@ public class PlayerObject : RenderableGameObject
         SetState(PlayerState.Attack, direction);
     }
 
-    public void UpdatePlayerPosition(double up, double down, double left, double right, int width, int height,
-        double time)
+    public void UpdatePlayerPosition(double up, double down, double left, double right, int width, int height, double time, Engine engine)
     {
-        if(State.State == PlayerState.GameOver) return;
+        if (State.State == PlayerState.GameOver) return;
         if (up <= double.Epsilon &&
             down <= double.Epsilon &&
             left <= double.Epsilon &&
             right <= double.Epsilon &&
-            State.State == PlayerState.Idle){
+            State.State == PlayerState.Idle)
+        {
             return;
         }
 
@@ -95,42 +95,36 @@ public class PlayerObject : RenderableGameObject
         var y = Position.Y - (int)(up * pixelsToMove);
         y += (int)(down * pixelsToMove);
 
-        if (x < 10)
+        if (x < 10) x = 10;
+        if (y < 24) y = 24;
+        if (x > width - 10) x = width - 10;
+        if (y > height - 6) y = height - 6;
+
+        // Check if the new position is walkable
+        if (!engine.IsTileWalkable(x, y))
         {
-            x = 10;
+            x = Position.X;
+            y = Position.Y;
         }
 
-        if (y < 24)
+        if (y < Position.Y)
         {
-            y = 24;
-        }
-
-        if (x > width - 10)
-        {
-            x = width - 10;
-        }
-
-        if (y > height - 6)
-        {
-            y = height - 6;
-        }
-
-
-
-        if (y < Position.Y){
             SetState(PlayerState.Move, PlayerStateDirection.Up);
         }
-        if (y > Position.Y ){
+        if (y > Position.Y)
+        {
             SetState(PlayerState.Move, PlayerStateDirection.Down);
         }
-        if (x > Position.X ){
+        if (x > Position.X)
+        {
             SetState(PlayerState.Move, PlayerStateDirection.Right);
         }
-        if (x < Position.X){
+        if (x < Position.X)
+        {
             SetState(PlayerState.Move, PlayerStateDirection.Left);
         }
-        if (x == Position.X &&
-            y == Position.Y){
+        if (x == Position.X && y == Position.Y)
+        {
             SetState(PlayerState.Idle, State.Direction);
         }
 
