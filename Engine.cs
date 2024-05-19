@@ -93,6 +93,7 @@ namespace TheAdventure
             bool right = _input.IsRightPressed();
             bool isAttacking = _input.IsKeyAPressed();
             bool addBomb = _input.IsKeyBPressed();
+            bool addCoin = _input.IsKeyBPressed();
 
             _scriptEngine.ExecuteAll(this);
 
@@ -128,11 +129,15 @@ namespace TheAdventure
             {
                 AddBomb(_player.Position.X, _player.Position.Y, false);
             }
+            if (addCoin)
+            {
+                AddCoin(_player.Position.X, _player.Position.Y, false);
+            }
 
             foreach (var gameObjectId in itemsToRemove)
             {
                 var gameObject = _gameObjects[gameObjectId];
-                if (gameObject is TemporaryGameObject)
+                if (gameObject is BombObject)
                 {
                     var tempObject = (TemporaryGameObject)gameObject;
                     var deltaX = Math.Abs(_player.Position.X - tempObject.Position.X);
@@ -143,7 +148,18 @@ namespace TheAdventure
                     }
                     DestroyTile(tempObject.Position.X, tempObject.Position.Y);
                     _gameObjects.Remove(tempObject.Id);
-
+                }
+                else if (gameObject is TemporaryGameObject)
+                {
+                    var tempObject = (TemporaryGameObject)gameObject;
+                    var deltaX = Math.Abs(_player.Position.X - tempObject.Position.X);
+                    var deltaY = Math.Abs(_player.Position.Y - tempObject.Position.Y);
+                    if (deltaX < 32 && deltaY < 32)
+                    {
+                        var spriteSheet = SpriteSheet.LoadSpriteSheet("coin.json", "Assets", _renderer);
+                        spriteSheet.ActivateAnimation("Pickup");
+                    }
+                    _gameObjects.Remove(tempObject.Id);
                 }
             }
         }
@@ -243,8 +259,20 @@ namespace TheAdventure
             if (spriteSheet != null)
             {
                 spriteSheet.ActivateAnimation("Explode");
-                TemporaryGameObject bomb = new(spriteSheet, 2.1, (translated.X, translated.Y));
+                BombObject bomb = new(spriteSheet, 2.1, (translated.X, translated.Y));
                 _gameObjects.Add(bomb.Id, bomb);
+            }
+        }
+        
+        public void AddCoin(int x, int y, bool translateCoordinates = true)
+        {
+            var translated = translateCoordinates ? _renderer.TranslateFromScreenToWorldCoordinates(x, y) : new Vector2D<int>(x, y);
+
+            var spriteSheet = SpriteSheet.LoadSpriteSheet("coin.json", "Assets", _renderer);
+            if (spriteSheet != null)
+            {
+                TemporaryGameObject coin = new(spriteSheet, 2.1, (translated.X, translated.Y));
+                _gameObjects.Add(coin.Id, coin);
             }
         }
 
