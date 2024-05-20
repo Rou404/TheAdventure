@@ -21,6 +21,10 @@
       <Content Include="Assets\BombExploding.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <None Remove="Assets\coin.png" />
+      <Content Include="Assets\coin.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
       <None Remove="Assets\grass.tsj" />
       <Content Include="Assets\grass.tsj">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -55,6 +59,10 @@
       </Content>
       <None Remove="Assets\Scripts\RandomBomb.script" />
       <Content Include="Assets\Scripts\RandomBomb.script">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Scripts\RandomCoin.script" />
+      <Content Include="Assets\Scripts\RandomCoin.script">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
